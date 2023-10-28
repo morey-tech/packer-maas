@@ -26,7 +26,7 @@ results in an image that is very close to the ones that are on
 
 ### Building the image
 
-The build the image you give the template a script which has all the
+To build the image you give the template a script which has all the
 customizations:
 
 ```shell
