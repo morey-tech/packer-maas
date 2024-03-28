@@ -18,70 +18,6 @@ The Packer templates in this directory creates Ubuntu images for use with MAAS.
 * [MAAS](https://maas.io) 3.0+
 * [Curtin](https://launchpad.net/curtin) 21.0+
 
-## ubuntu-cloudimg.pkr.hcl
-
-This template builds a tgz image from the official Ubuntu cloud images. This
-results in an image that is very close to the ones that are on
-<https://images.maas.io/>.
-
-### Building the image
-
-To build the image you give the template a script which has all the
-customizations:
-
-```shell
-packer init .
-packer build -var customize_script=my-changes.sh -var ubuntu_series=jammy \
-    -only='cloudimg.*' .
-```
-
-`my-changes.sh` is a script you write which customizes the image from within
-the VM. For example, you can install packages using `apt-get`, call out to
-ansible, or whatever you want.
-
-#### Accessing external files from you script
-
-If you want to put or use some files in the image, you can put those in the `http` directory.
-
-Whatever file you put there, you can access from within your script like this:
-
-```shell
-wget http://${PACKER_HTTP_IP}:${PACKER_HTTP_PORT}:/my-file
-```
-
-### Installing a kernel
-
-Usually, images used by MAAS don't include a kernel. When a machine is deployed
-in MAAS, the appropriate kernel is chosen for that machine and installed on top
-of the chosen image.
-
-If you do want to force an image to always use a specific kernel, you can
-include it in the image.
-
-The easiest way of doing this is to use the `kernel` parameter:
-
-```shell
-packer init .
-packer build -var kernel=linux-lowlatency -var customize_script=my-changes.sh \
-    -only='cloudimg.*' .
-```
-
-You can also install the kernel manually in your `my-changes.sh` script, but in
-that case you also need to write the name of the kernel package to
-`/curtin/CUSTOM_KERNEL`. This is to ensure that MAAS won't install another
-kernel on deploy.
-
-### Building different architectures
-
-By default, images are produces for amd64. You can build for arm64 as well if
-you specify the `architecture` parameter:
-
-```shell
-packer init .
-packer build -var architecture=arm64 -var customize_script=my-changes.sh \
-    -only='cloudimg.*' .
-```
-
 ## ubuntu-flat.pkr.hcl and ubuntu-lvm.pkr.hcl
 
 These templates use an Ubuntu server image to install the image to the VM. It
@@ -116,13 +52,6 @@ packer-maas/ubuntu you can generate an image with:
 ```shell
 packer init .
 PACKER_LOG=1 packer build -only=qemu.lvm .
-```
-
-or
-
-```shell
-packer init .
-PACKER_LOG=1 packer build -only=qemu.flat .
 ```
 
 Note: ubuntu-lvm.pkr.hcl and ubuntu-flat.pkr.hcl are configured to run Packer in headless mode. Only Packer output will be seen. If you wish to see the installation output connect to the VNC port given in the Packer output or change the value of headless to false in the HCL2 file.
